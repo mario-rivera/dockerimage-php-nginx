@@ -2,20 +2,19 @@ FROM php:7.3-fpm
 
 ENV WORKDIR /www
 
-RUN apt-get update && apt-get install -y \
-git \
-libzip-dev \
-libmemcached-dev \
-libssl-dev \
-nginx \
-supervisor \
+ENV BUILD_DEPS \
+    libssl-dev \
+    libzip-dev \
+    libmemcached-dev \
+    zip \
+    git \
+    nginx \
+    supervisor
+
+RUN apt-get update \
+&& apt-get install -y --no-install-recommends ${BUILD_DEPS} \
 && rm -rf /var/lib/apt/lists/* \
 && rm /etc/nginx/sites-enabled/*
-
-# install composer
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
-&& php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
-&& php -r "unlink('composer-setup.php');"
 
 # install php extensions
 RUN docker-php-ext-configure zip --with-libzip \
@@ -24,8 +23,13 @@ zip \
 && pecl install xdebug-2.7.1 \
 && docker-php-ext-enable xdebug
 
+# install composer
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+&& php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
+&& php -r "unlink('composer-setup.php');"
+
 # PHP ini file
-COPY php/conf/php.ini-development /usr/local/etc/php/php.ini
+COPY php/conf/php.ini-production /usr/local/etc/php/php.ini
 # Xdebug config
 COPY php/xdebug/xdebug.config.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.config.ini
 # Nginx config

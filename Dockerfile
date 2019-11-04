@@ -2,26 +2,27 @@ FROM php:7.3-fpm
 
 ENV WORKDIR /www
 
-ENV BUILD_DEPS \
+RUN apt-get update \
+&& apt-get install -y --no-install-recommends \
     libssl-dev \
     libzip-dev \
     libmemcached-dev \
+    libpq-dev \
+    librabbitmq-dev \
     zip \
+    unzip \
     git \
     nginx \
-    supervisor
-
-RUN apt-get update \
-&& apt-get install -y --no-install-recommends ${BUILD_DEPS} \
+    supervisor \
 && rm -rf /var/lib/apt/lists/* \
 && rm /etc/nginx/sites-enabled/*
 
 # install php extensions
 RUN docker-php-ext-configure zip --with-libzip \
 && docker-php-ext-install \
-zip \
-&& pecl install xdebug-2.7.1 \
-&& docker-php-ext-enable xdebug
+zip bcmath sockets pdo pdo_pgsql pdo_mysql \
+&& pecl install xdebug-2.7.1 mongodb-1.6.0 amqp-1.9.4 \
+&& docker-php-ext-enable xdebug mongodb amqp
 
 # install composer
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \

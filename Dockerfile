@@ -20,7 +20,7 @@ RUN apt-get update \
 # install php extensions
 RUN docker-php-ext-configure zip --with-libzip \
 && docker-php-ext-install \
-zip bcmath sockets pdo pdo_pgsql pdo_mysql \
+zip bcmath sockets mysqli pdo pdo_pgsql pdo_mysql \
 && pecl install xdebug-2.7.1 mongodb-1.6.0 amqp-1.9.4 \
 && docker-php-ext-enable xdebug mongodb amqp
 
